@@ -11,11 +11,14 @@ We further use the following tools to create training and testing sets:
 
 ## Dependencies
 Training requires the following python packages: <tt>tensorflow</tt>, <tt>numpy</tt>
+
 Testing requires the following python packages: <tt>tensorflow</tt>, <tt>numpy</tt>, <tt>astropy</tt> (testing output is saved as a .fits file)
+
 Creating training and testing sets requires the following python packages: <tt>numpy</tt>, <tt>scipy</tt>, <tt>matplotlib</tt>, <tt>astropy</tt>, <tt>photutils</tt>,
 
 ## Get our code
 Clone this repo:
 ```bash
 git clone https://github.com/SpaceML/PSFGAN.git
+cd  PSFGAN/
 ```
