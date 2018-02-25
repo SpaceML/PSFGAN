@@ -33,7 +33,7 @@ The first step always is modifying the file config.py. The most important parame
 ### Create training/validation/testing sets
 The original images to be used for training should be in a folder "fits_train" and the original images for the test (validation) set in a folder "fits_test" ("fits_eval"). The script roou.py then adds simulated AGN point sources to the centers of the original galaxies, preprocesses the images, and saves them as .npy files so that they can be importet by the GAN. 
 
-```python
+```bash
 python roou.py --mode 1 --mcombine 1 # Create a test and median combine stars to extract the PSF.
 ```
 
