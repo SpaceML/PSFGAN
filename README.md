@@ -22,3 +22,15 @@ Clone this repo:
 git clone https://github.com/SpaceML/PSFGAN.git
 cd  PSFGAN/
 ```
+
+## Run our code
+First modify the file config.py. The relevant parameters are the following:
+* run_case
+* stretch_type
+* scale_factor
+
+### Create training/validation/testing sets
+
+### Train PSFGAN
+
+### Run a trained model
