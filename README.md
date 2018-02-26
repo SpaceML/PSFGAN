@@ -26,11 +26,11 @@ cd  PSFGAN/
 
 ## Run our code
 The first step always is modifying the file config.py. The most important parameters are the following:
-* core_path: Path to directory containing all the subdirectories.
-* redshift: Unique redshift identifier used for naming the subdirectories.
-* filter_: Unique identifier to distinguish images observed in different filters.
-* model_path: Path to .ckpt file of pretrained model used in test.py. Should be an empty string if PSFGAN is used in training mode.
-* use_gpu: Value that "CUDA_VISIBLE_DEVICES" should be set to.
+* ```core_path```: Path to directory containing all the subdirectories.
+* ```redshift```: Unique redshift identifier used for naming the subdirectories.
+* ```filter_```: Unique identifier to distinguish images observed in different filters.
+* ```model_path```: Path to .ckpt file of pretrained model used in test.py. Should be an empty string if PSFGAN is used in training mode.
+* ```use_gpu```: Value that "CUDA_VISIBLE_DEVICES" should be set to.
 
 ### Create training/validation/testing sets
 *If you already have training/testing data or you are applying PSFGAN to real data, you can skip everything described in this section.*
@@ -70,8 +70,8 @@ Then you can run roou.py:
 python roou.py --mode 1 --mcombine 1     # Create a test and median combine stars to extract the PSF.
 ```
 
-* mode: If set to 0, the images from "fits_train" are used; if set to 1, the images from "fits_test" are used; if set to 2, the images from "fits_eval" are used.
-* mcombine: If set to False, the SDSS PSF tool is used to extract a PSF for each image. If mcombine is set to True, the PSF is extracted by median combining stars from the neighborhood of the galaxy.
+* ```mode```: If set to 0, the images from "fits_train" are used; if set to 1, the images from "fits_test" are used; if set to 2, the images from "fits_eval" are used.
+* ```mcombine```: If set to False, the SDSS PSF tool is used to extract a PSF for each image. If mcombine is set to True, the PSF is extracted by median combining stars from the neighborhood of the galaxy.
 
 ### Train PSFGAN
 ```bash
