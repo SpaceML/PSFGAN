@@ -509,7 +509,7 @@ def empirical_PSF(data, x_icords, y_icords, cutout_size, fwhm_pix, galfit_tmp,
     return weighted_median_stacking(cutouts_recentered, weights_final)
 
 
-def add_sdss_PSF(origpath, original, psf_flux, obj_line, SDSStol_path,
+def add_sdss_PSF(origpath, original, psf_flux, obj_line, SDSStool_path,
                  psFields_path, sexdir=None, median_combine=False, 
                  save_psf=False):
     """
@@ -519,7 +519,7 @@ def add_sdss_PSF(origpath, original, psf_flux, obj_line, SDSStol_path,
                        original image.
         obj_line:      Dictionary containing the following SDSS parameters
                        keywords: run, rerun, camcol, field, colc, rowc, dr7ObjID.
-        SDSStol_path:  Path to SDSS tool (stand alone code) executable.
+        SDSStool_path:  Path to SDSS tool (stand alone code) executable.
         psFields_path: Path to PSF meda data (psFields).
         sexdir:        Path where temporary SExtractor files should be saved.
                        This directory is emptied after SExtractor has done its 
