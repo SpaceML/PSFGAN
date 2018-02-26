@@ -33,7 +33,7 @@ The first step always is modifying the file config.py. The most important parame
 * use_gpu: Value that "CUDA_VISIBLE_DEVICES" should be set to.
 
 ### Create training/validation/testing sets
-If you already have training/testing data or you are applying PSFGAN to real data, you can skip everything described in this section.
+*If you already have training/testing data or you are applying PSFGAN to real data, you can skip everything described in this section.*
 
 The code assumes a directory structure like the following.
 ```bash
