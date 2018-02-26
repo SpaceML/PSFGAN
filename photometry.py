@@ -510,7 +510,8 @@ def empirical_PSF(data, x_icords, y_icords, cutout_size, fwhm_pix, galfit_tmp,
 
 
 def add_sdss_PSF(origpath, original, psf_flux, obj_line, SDSStol_path,
-                 psFields_path, sexdir=None, median_combine=False):
+                 psFields_path, sexdir=None, median_combine=False, 
+                 save_psf=False):
     """
     Args:
         origpath:      Path to original images.
