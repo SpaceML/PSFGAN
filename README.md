@@ -26,7 +26,7 @@ core_path/
         ├── fits_eval
         ├── fits_test
         └── fits_train
-``
+```
 
 ## Dependencies
 Training requires the following python packages: <tt>tensorflow</tt>, <tt>numpy</tt>
