@@ -56,8 +56,11 @@ In this example there are two subfolders containing training, testing and valida
 You should modify some paths in roou.py:
 * tmpdir_for_SExtractor: Directory where temporary files for SExtractor are saved. This is only needed if the flag "mcombine" is set to 1.
 * psfTool_path: Directory containing the executable of the SDSS PSF tool path.
-* psfFields_dir: Directory containing the SDSS PSF metadata (psFields). These are used to extract stars if the flag "mcombine" is set to 1. For each original image their should be the field where the galaxy image was cut out from. It should be named as "objid-filter.fits".
+* psfFields_dir: Directory containing the SDSS PSF metadata (psFields). This data is used as input for the SDSS PSF tool. 
 
+Then you should modify some paths in photometry.py
+* galfit_command: Path to <tt>GALFIT</tt> executables.
+* fields_core_path: Path to parent directory containing the SDSS fields (structured according to "run" and "camcol")
 
 The original images to be used for training should be in a folder "fits_train" and the original images for the test (validation) set in a folder "fits_test" ("fits_eval"). The script roou.py then adds simulated AGN point sources to the centers of the original galaxies, preprocesses the images, and saves them as .npy files so that they can be importet by the GAN. 
 
