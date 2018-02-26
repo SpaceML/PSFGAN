@@ -56,13 +56,13 @@ In this example there are two subfolders containing training, testing and valida
 The script roou.py then takes the original .fits images from one of the three folders (fits_eval, fits_test, fits_train) and adds simulated AGN point sources to the galaxies in their centers. It also preprocesses the images, and saves them as .npy files so that they can be importet by the GAN.
 
 You should modify some paths in roou.py:
-* ```python tmpdir_for_SExtractor```: Directory where temporary files for SExtractor are saved. This is only needed if the flag "mcombine" is set to 1.
-* psfTool_path: Directory containing the executable of the SDSS PSF tool path.
-* psfFields_dir: Directory containing the SDSS PSF metadata (psFields). This data is used as input for the SDSS PSF tool. 
+* ```tmpdir_for_SExtractor```: Directory where temporary files for SExtractor are saved. This is only needed if the flag "mcombine" is set to 1.
+* ```psfTool_path: Directory``` containing the executable of the SDSS PSF tool path.
+* ```psfFields_dir```: Directory containing the SDSS PSF metadata (psFields). This data is used as input for the SDSS PSF tool. 
 
 Then you should modify some paths in photometry.py
-* galfit_command: Path to <tt>GALFIT</tt> executables.
-* fields_core_path: Path to parent directory containing the SDSS fields (structured according to "run" and "camcol")
+* ```galfit_command```: Path to <tt>GALFIT</tt> executables.
+* ```fields_core_path```: Path to parent directory containing the SDSS fields (structured according to "run" and "camcol")
 
 Then you can run roou.py:
 
