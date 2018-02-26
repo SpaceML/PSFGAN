@@ -13,7 +13,7 @@ We further use the following tools to create training and testing sets:
 The code assumes a directory structure like the following.
 
 ```bash
-UserXX/
+core_path/
 ├── hubble_z_0.45
 │   └── h-band
 │       ├── catalog_z_0.4_0.5.fits
@@ -26,7 +26,7 @@ UserXX/
         ├── fits_eval
         ├── fits_test
         └── fits_train
-```
+``
 
 ## Dependencies
 Training requires the following python packages: <tt>tensorflow</tt>, <tt>numpy</tt>
