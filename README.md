@@ -4,6 +4,7 @@ This project is the implementation of the paper "<tt>PSFGAN</tt>: a generative a
 
 ## Prerequisites
 Linux or OSX
+
 NVIDIA GPU + CUDA CuDNN for training on GPU's
 
 We further use the following tools to create training and testing sets:
