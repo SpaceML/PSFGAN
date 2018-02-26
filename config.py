@@ -19,7 +19,8 @@ class Config:
     sum_lambda = 0
     
     # directory tree setup
-    run_case = "/mnt/ds3lab/dostark/z_%s/%s-band" % (redshift, filter_)
+    core_path = "/mnt/ds3lab/dostark"
+    run_case = "%s/z_%s/%s-band" % (core_path, redshift, filter_)
     ext = '_test_all_stars'
     stretch_setup = '%s/%s_%s%s' % (run_case, stretch_type, scale_factor, ext)
     sub_config = '%s/lintrain_classic_WGAN_%s/lr_%s' % (stretch_setup, 
