@@ -8,7 +8,7 @@ Linux or OSX
 NVIDIA GPU + CUDA CuDNN for training on GPU's
 
 We further use the following tools to create training and testing sets:
-<tt>GALFIT</tt>, <tt>Source Extractor</tt>
+<tt>GALFIT</tt>, <tt>Source Extractor</tt>, SDSS PSF tool ("Stand Alone Code" downloaded from http://www.sdss.org/dr12/algorithms/read_psf/)
 
 ## Dependencies
 Training requires the following python packages: <tt>tensorflow</tt>, <tt>numpy</tt>
@@ -37,7 +37,7 @@ If you already have training/testing data or you are applying PSFGAN to real dat
 
 First you should modify some paths in roou.py:
 * tmpdir_for_SExtractor: Directory where temporary files for SExtractor are saved. This is only needed if the flag "mcombine" is set to 1.
-* psfTool_path: Directory containing the executable of the SDSS PSF tool path. This is the so-called "Stand Alone Code" downloaded from the following website [http://www.sdss.org/dr12/algorithms/read_psf/].
+* psfTool_path: Directory containing the executable of the SDSS PSF tool path.
 * psfFields_dir: Directory containing the SDSS fields. These are used to extract stars if the flag "mcombine" is set to 1. For each original image their should be the field where the galaxy image was cut out from. It should be named as "<objid>-<filter>.fits".
 
 
