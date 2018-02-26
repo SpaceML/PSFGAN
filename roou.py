@@ -21,6 +21,9 @@ tmpdir_for_SExtractor = '/mnt/ds3lab/dostark/z_'+str(conf.redshift)+\
 psfTool_path = '/mnt/ds3lab/blaunet/readAtlasImages-v5_4_11/read_PSF'
 psfFields_dir = '/mnt/ds3lab/galaxian/source/sdss/dr12/psf-data'
 # Path to Hubble PSF if used:
+
+# The following paths are only needed, if the Hubble PSF is used for simulating 
+# AGN point sources.
 path_to_Hubble_psf = '/mnt/ds3lab/dostark/hubble_psf_many_stars.fits'
 #path_to_Hubble_psf = '/mnt/ds3lab/dostark/PSFSTD_WFC3IR_F160W.fits'
 tmp_GALFIT = '/mnt/ds3lab/dostark/hubble_z_'+str(conf.redshift)+\

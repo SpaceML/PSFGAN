@@ -33,6 +33,14 @@ The first step always is modifying the file config.py. The most important parame
 * use_gpu: Value that "CUDA_VISIBLE_DEVICES" should be set to.
 
 ### Create training/validation/testing sets
+If you already have training/testing data or you are applying PSFGAN to real data, you can skip everything described in this section.
+
+First you should modify some paths in roou.py:
+* tmpdir_for_SExtractor: Directory where temporary files for SExtractor are saved. This is only needed if the flag "mcombine" is set to 1.
+* psfTool_path: Directory containing the executable of the SDSS PSF tool path. This is the so-called "Stand Alone Code" downloaded from the following website [http://www.sdss.org/dr12/algorithms/read_psf/].
+* psfFields_dir: Directory containing the SDSS fields. These are used to extract stars if the flag "mcombine" is set to 1. For each original image their should be the field where the galaxy image was cut out from. It should be named as "<objid>-<filter>.fits".
+
+
 The original images to be used for training should be in a folder "fits_train" and the original images for the test (validation) set in a folder "fits_test" ("fits_eval"). The script roou.py then adds simulated AGN point sources to the centers of the original galaxies, preprocesses the images, and saves them as .npy files so that they can be importet by the GAN. 
 
 ```bash
