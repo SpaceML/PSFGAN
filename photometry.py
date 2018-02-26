@@ -15,7 +15,7 @@ import random
 
 sex = 'sextractor'
 galfit_command = '/mnt/ds3lab/dostark/galfit_binaries/galfit'
-
+fields_core_path = '/mnt/ds3lab/dostark/galaxian/source/sdss/dr12/plates/'
 
 def calc_zeropoint(exposure_time, calibration_factor):
     return 22.5 + 2.5 * np.log10(1. / exposure_time / calibration_factor)
@@ -310,7 +310,7 @@ def get_field(obj_line):
     Returns:
         Returns the desired SDSS field as a numpy array.
     """
-    core_path = '/mnt/ds3lab/dostark/galaxian/source/sdss/dr12/plates/'
+    core_path = fields_core_path
     filter_string = conf.filter_
     run = obj_line['run'].item()
     rerun = obj_line['rerun'].item()
