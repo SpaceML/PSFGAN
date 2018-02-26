@@ -51,7 +51,9 @@ core_path/
         ├── fits_test
         └── fits_train
 ```
-In this example there are two subfolders containing training, testing and validation images and a catalog. For SDSS data the catalog must contain a column with the SDSS objids and a column with the SDSS keyword "cModelFlux" (host galaxy flux in nanomaggies).
+In this example there are two subfolders containing training, testing and validation images and a catalog. For SDSS data the catalog must contain a column with the SDSS objids and a column with the SDSS keyword "cModelFlux" (host galaxy flux in nanomaggies). 
+
+The script roou.py then takes the original .fits images from one of the three folders (fits_eval, fits_test, fits_train) and adds simulated AGN point sources to the galaxies in their centers. It also preprocesses the images, and saves them as .npy files so that they can be importet by the GAN.
 
 You should modify some paths in roou.py:
 * tmpdir_for_SExtractor: Directory where temporary files for SExtractor are saved. This is only needed if the flag "mcombine" is set to 1.
@@ -62,7 +64,7 @@ Then you should modify some paths in photometry.py
 * galfit_command: Path to <tt>GALFIT</tt> executables.
 * fields_core_path: Path to parent directory containing the SDSS fields (structured according to "run" and "camcol")
 
-The original images to be used for training should be in a folder "fits_train" and the original images for the test (validation) set in a folder "fits_test" ("fits_eval"). The script roou.py then adds simulated AGN point sources to the centers of the original galaxies, preprocesses the images, and saves them as .npy files so that they can be importet by the GAN. 
+Then you can run roou.py:
 
 ```bash
 python roou.py --mode 1 --mcombine 1     # Create a test and median combine stars to extract the PSF.
