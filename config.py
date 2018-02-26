@@ -13,7 +13,7 @@ class Config:
     attention_parameter = 0.05
     # if you are not going to train from the very beginning (or only testing),
     # change this path to the existing model path
-    #model_path = ''
+    model_path = ''
     beta1 = 0.5
     L1_lambda = 100
     sum_lambda = 0
