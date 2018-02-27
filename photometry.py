@@ -295,7 +295,7 @@ def run_sdss_psftool(obj_line, psf_fname, SDSStool_path, psFields_path):
         hdu = fits.PrimaryHDU(psf_data)
         hdu.writeto(psf_fname)
     except:
-        print('no psf %s' % psf_filename)
+        print('no psf %s' % psf_fname)
         print('psfField = %s' % psfField)
         print('rowc = %s' % rowc)
         print('colc = %s' % colc)

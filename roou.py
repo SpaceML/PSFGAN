@@ -14,7 +14,7 @@ import logging
 
 parser = argparse.ArgumentParser()
 
-# Path to the 'read_PSF' SDSS PSF tool : http://www.sdss.org/dr12/algorithms/read_psf/
+# Path to the folder containing 'read_PSF' SDSS PSF tool : http://www.sdss.org/dr12/algorithms/read_psf/
 psfTool_path = ''
 if psfTool_path == '':
     logging.warn('In roou.py : no path provided to your SDSS PSF tool.'\
