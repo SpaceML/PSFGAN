@@ -34,7 +34,7 @@ path_to_Hubble_tot_field = ''
 
 # Directories for temporary files
 tmpdir_for_SExtractor = conf.stretch_setup+'/tmp_for_SExtractor/'
-tmp_GALFIT = conf.stretch_setup+'/tmp_for_GALFIT/'
+tmp_GALFIT = conf.stretch_setup+'/tmp_for_GALFIT/'  
 
 
 
