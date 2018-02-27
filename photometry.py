@@ -280,7 +280,7 @@ def run_sdss_psftool(obj_line, psf_fname, SDSStool_path, psFields_path):
         psfField = '%s/%d/%d/objcs/%d/psField-%06d-%d-%04d.fit' % (
             psfFields_dir_1, rerun, run, camcol, run, camcol, field)
     if not os.path.exists(psfField):
-        raise OSError('No psfField fit found')
+        raise OSError('psfField %s not found'%psfField)
 
     colc = obj_line['colc'].item()
     rowc = obj_line['rowc'].item()

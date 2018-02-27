@@ -5,7 +5,8 @@
 *.pyc
 
 #All folders
-#*/
+*/
+!sextractor_defaultfiles/
 
 #All tarballs
 *.tar
