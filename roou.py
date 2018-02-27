@@ -23,15 +23,19 @@ if psfTool_path == '':
 # Path to PSF metadata (psFields) which the SDSS PSF tool uses as input.
 psfFields_dir = conf.core_path+'/source/sdss/dr12/psf-data'
 
-# Path to Hubble PSF if used:
-# The following paths are only needed, if the Hubble PSF is used for simulating
-# AGN point sources.
-path_to_Hubble_psf = '/mnt/ds3lab/dostark/hubble_psf_many_stars.fits'
-#path_to_Hubble_psf = '/mnt/ds3lab/dostark/PSFSTD_WFC3IR_F160W.fits'
+# Path used if psf=='hubble':
+# The following path is only needed, if one single Hubble PSF is used for 
+# simulating AGN point sources (mcombine==False).
+path_to_Hubble_psf = ''
+# Path to Hubble field which is used to extract an empirical PSF from stars
+# (position dependent). This is only needed if mcombine is set to True.
+path_to_Hubble_tot_field = ''
+
 
 # Directories for temporary files
 tmpdir_for_SExtractor = conf.stretch_setup+'/tmp_for_SExtractor/'
 tmp_GALFIT = conf.stretch_setup+'/tmp_for_GALFIT/'
+
 
 
 def roou():
@@ -59,6 +63,12 @@ def roou():
     ratio_max = conf.max_contrast_ratio
     ratio_min = conf.min_contrast_ratio
     uniform_logspace = conf.uniform_logspace
+
+    if psf_type == 'hubble':
+        if mcombine_boolean==False and path_to_Hubble_psf=='':
+            logging.warn('In roou.py : no path provided to Hubble PSF')
+        if mcombine_boolean and path_to_Hubble_tot_field=='':
+            logging.warn('In roou.py : no path provided to Hubble field.')
 
     if mode == 1: #Test set
         input = '%s/fits_test' % conf.run_case
@@ -121,6 +131,13 @@ def roou():
             obj_line = catalog.loc[catalog['dr7ObjID'] == int(image_id)]
         elif data_type == 'hubble':
             obj_line = catalog.loc[catalog['IAU_Name'] == str(image_id)]
+        if psf_type == 'hubble':
+            # We use the total subfield of GOODS-S WFC3 F160W. Hence we have one
+            # single image that we use for each galaxy to extract the stars from
+            # the neighborhood. We assign the path inside the loop to keep the
+            # code generic enough for a User that wants to use a different path
+            # for each image.
+            Hubble_field = path_to_Hubble_tot_field
         if obj_line.empty:
             not_found = not_found + 1
             print('Not found')
@@ -181,7 +198,8 @@ def roou():
                                                      RA=obj_line['RAdeg'],
                                                      DEC=obj_line['DECdeg'],
                                                      GALFIT_tmpdir=tmp_GALFIT,
-                                                     save_psf=save_psf)
+                                                     save_psf=save_psf,
+                                                     field_path=Hubble_field)
             else:
                 data_PSF = photometry.add_hubble_PSF(i, data_r, r*flux,
                                                      psfdir=path_to_Hubble_psf,
@@ -254,9 +272,9 @@ def roou():
     print(pixel_max)
     print("%s images have not been used because there were no corresponding" \
            " objects in the catalog") % not_found
-    if mcombine_boolean and data_type == 'sdss':
+    if mcombine_boolean and psf_type == 'sdss':
         os.rmdir(sexdir)
-    if mcombine_boolean and data_type == 'hubble':
+    if mcombine_boolean and psf_type == 'hubble':
         os.rmdir(tmp_GALFIT)
 
 

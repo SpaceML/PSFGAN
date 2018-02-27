@@ -684,7 +684,7 @@ def add_sdss_PSF(origpath, original, psf_flux, obj_line, SDSStool_path,
 
 def add_hubble_PSF(origpath, original, psf_flux, santinidir=None,
                    median_combine=False, psfdir=None, RA=None, DEC=None,
-                   GALFIT_tmpdir=None, save_psf=False):
+                   GALFIT_tmpdir=None, save_psf=False, field_path=None):
     """
     Args:
         origpath:      Path to original images.
@@ -708,13 +708,16 @@ def add_hubble_PSF(origpath, original, psf_flux, santinidir=None,
                        True and all the temporary files will be deleted after
                        they have been used.
         save_psf:      True if PSF should be saved for each image.
+        field_path:    Path to field where stars should be extracted from (to
+                       create a PSF)
     """
     # If the PSF used for the fake AGN has to be saved (save_psf==True):
     psf_save_path = conf.run_case+'/psf_used/'
     pixel_scale = 0.06
     fwhm = 0.18
     if median_combine:
-        path_to_field = conf.run_case+"/hlsp_candels_hst_wfc3_gs-tot_f160w_v1.0_drz.fits"
+        #path_to_field = conf.run_case+"/hlsp_candels_hst_wfc3_gs-tot_f160w_v1.0_drz.fits"
+        path_to_field = field_path
         if not os.path.isdir(GALFIT_tmpdir):
             os.makedirs(GALFIT_tmpdir)
         table = astrotable.Table.read(santinidir)
@@ -763,13 +766,7 @@ def add_hubble_PSF(origpath, original, psf_flux, santinidir=None,
             return None
 
     else: # else <==> median_combine==False
-        if psfdir=='/mnt/ds3lab/dostark/PSFSTD_WFC3IR_F160W.fits':
-            index = random.randint(0, 8)
-            print index
-            hdu_psf = fits.open(psfdir)[0]
-            psf_unscaled = hdu_psf.data[index]
-        else:
-            psf_unscaled = fits.getdata(psfdir)
+        psf_unscaled = fits.getdata(psfdir)
         csize = 40
 
     if median_combine:
