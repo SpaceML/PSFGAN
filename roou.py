@@ -10,25 +10,32 @@ import photometry
 from config import Config as conf
 import normalizing
 import astropy.table as astrotable
+import logging
 
 parser = argparse.ArgumentParser()
-# Path to directory where SExtractor should save the temporary files.
-tmpdir_for_SExtractor = '/mnt/ds3lab/dostark/z_'+str(conf.redshift)+\
-                        '/r-band/tmp_for_SExtractor_'+str(conf.ext)+\
-                        '_'+str(conf.stretch_type)+'_'+\
-                        str(conf.scale_factor)+'/'
-# Path to PSF metadata (psFields) which the SDSS PSF tool uses as input.
-psfTool_path = '/mnt/ds3lab/blaunet/readAtlasImages-v5_4_11/read_PSF'
-psfFields_dir = '/mnt/ds3lab/galaxian/source/sdss/dr12/psf-data'
-# Path to Hubble PSF if used:
 
-# The following paths are only needed, if the Hubble PSF is used for simulating 
-# AGN point sources.
-path_to_Hubble_psf = '/mnt/ds3lab/dostark/hubble_psf_many_stars.fits'
-#path_to_Hubble_psf = '/mnt/ds3lab/dostark/PSFSTD_WFC3IR_F160W.fits'
-tmp_GALFIT = '/mnt/ds3lab/dostark/hubble_z_'+str(conf.redshift)+\
-             '/'+conf.filter_+'-band/tmp_for_GALFIT_'+str(conf.ext)+\
-             '_'+str(conf.stretch_type)+'_'+str(conf.scale_factor)+'/'
+# Path to the folder containing 'read_PSF' SDSS PSF tool : http://www.sdss.org/dr12/algorithms/read_psf/
+psfTool_path = ''
+if psfTool_path == '':
+    logging.warn('In roou.py : no path provided to your SDSS PSF tool.'\
+                 'This might raise an error if trying to add a SDSS PSF')
+
+# Path to PSF metadata (psFields) which the SDSS PSF tool uses as input.
+psfFields_dir = conf.core_path+'/source/sdss/dr12/psf-data'
+
+# Path used if psf=='hubble':
+# The following path is only needed, if one single Hubble PSF is used for 
+# simulating AGN point sources (mcombine==False).
+path_to_Hubble_psf = ''
+# Path to Hubble field which is used to extract an empirical PSF from stars
+# (position dependent). This is only needed if mcombine is set to True.
+path_to_Hubble_tot_field = ''
+
+
+# Directories for temporary files
+tmpdir_for_SExtractor = conf.stretch_setup+'/tmp_for_SExtractor/'
+tmp_GALFIT = conf.stretch_setup+'/tmp_for_GALFIT/'  
+
 
 
 def roou():
@@ -56,7 +63,13 @@ def roou():
     ratio_max = conf.max_contrast_ratio
     ratio_min = conf.min_contrast_ratio
     uniform_logspace = conf.uniform_logspace
-    
+
+    if psf_type == 'hubble':
+        if mcombine_boolean==False and path_to_Hubble_psf=='':
+            logging.warn('In roou.py : no path provided to Hubble PSF')
+        if mcombine_boolean and path_to_Hubble_tot_field=='':
+            logging.warn('In roou.py : no path provided to Hubble field.')
+
     if mode == 1: #Test set
         input = '%s/fits_test' % conf.run_case
         catalog_path = glob.glob('%s/catalog_test*' % conf.run_case)[0]
@@ -78,7 +91,7 @@ def roou():
                              'hubble'. ")
         save_raw_input = False
     print('Input files : %s' % input)
-    
+
     # Read information (e.g. SDSS objid, path to image file, etc.) from catalog.
     if data_type == 'sdss':
         catalog = pandas.read_csv(catalog_path)
@@ -90,7 +103,7 @@ def roou():
     train_folder = '%s/train' % output
     test_folder = '%s/test' % output
     eval_folder = '%s/eval' % output
-    # raw_test_folde is the path to the folder where the unstretched input 
+    # raw_test_folde is the path to the folder where the unstretched input
     # images (galaxy + AGN) are saved as .fits files.
     raw_test_folder = '%s/fits_input%s' % (conf.run_case, conf.ext)
     if not os.path.exists(train_folder):
@@ -118,6 +131,13 @@ def roou():
             obj_line = catalog.loc[catalog['dr7ObjID'] == int(image_id)]
         elif data_type == 'hubble':
             obj_line = catalog.loc[catalog['IAU_Name'] == str(image_id)]
+        if psf_type == 'hubble':
+            # We use the total subfield of GOODS-S WFC3 F160W. Hence we have one
+            # single image that we use for each galaxy to extract the stars from
+            # the neighborhood. We assign the path inside the loop to keep the
+            # code generic enough for a User that wants to use a different path
+            # for each image.
+            Hubble_field = path_to_Hubble_tot_field
         if obj_line.empty:
             not_found = not_found + 1
             print('Not found')
@@ -147,11 +167,11 @@ def roou():
         elif data_type == 'hubble':
             fwhm = 0.18
             fwhm_use = fwhm / 0.06
-        
+
         # Sample the contrast ratios from the distribution specified in the file
         # config.py
         if uniform_logspace:
-            r_exponent = random.uniform(np.log10(ratio_min), 
+            r_exponent = random.uniform(np.log10(ratio_min),
                                         np.log10(ratio_max))
             r = 10**r_exponent
         else:
@@ -178,7 +198,8 @@ def roou():
                                                      RA=obj_line['RAdeg'],
                                                      DEC=obj_line['DECdeg'],
                                                      GALFIT_tmpdir=tmp_GALFIT,
-                                                     save_psf=save_psf)
+                                                     save_psf=save_psf,
+                                                     field_path=Hubble_field)
             else:
                 data_PSF = photometry.add_hubble_PSF(i, data_r, r*flux,
                                                      psfdir=path_to_Hubble_psf,
@@ -190,10 +211,10 @@ def roou():
         if data_PSF is None:
             print('Ignoring file %s because PSF is missing.' % i)
             continue
-            
+
         print('data_r centroid : %s' % photometry.find_centroid(data_r))
         print('data_PSF centroid : %s' % photometry.find_centroid(data_PSF))
-        
+
         if (cropsize > 0):
             figure_original = np.ones((2*cropsize, 2*cropsize,
                                        conf.img_channel))
@@ -210,8 +231,8 @@ def roou():
             figure_with_PSF = np.ones((data_r.shape[0], data_r.shape[1],
                                        conf.img_channel))
             figure_with_PSF[:, :, 0] = data_PSF
-        
-       
+
+
         # Saving the "raw" data+PSF before stretching
         if save_raw_input:
             raw_name = '%s/%s-%s.fits' % (raw_test_folder, image_id,
@@ -221,7 +242,7 @@ def roou():
             hdu.writeto(raw_name, overwrite=True)
 
         # Preprocessing
-        Normalizer = normalizing.Normalizer(stretch_type=conf.stretch_type, 
+        Normalizer = normalizing.Normalizer(stretch_type=conf.stretch_type,
                                             scale_factor=conf.scale_factor,
                                             min_value=conf.pixel_min_value,
                                             max_value=conf.pixel_max_value)
@@ -233,7 +254,7 @@ def roou():
                                    figure_original.shape[1] * 2, 1))
         figure_combined[:, :figure_original.shape[1], :] = \
                                                         figure_original[:, :, :]
-        figure_combined[:, figure_original.shape[1]:2*figure_original.shape[1], 
+        figure_combined[:, figure_original.shape[1]:2*figure_original.shape[1],
                         :] = figure_with_PSF[:, :, :]
 
         if mode==1: # Testing set
@@ -246,11 +267,15 @@ def roou():
 
         if np.max(photometry.crop(data_PSF, 20)) > pixel_max:
                   pixel_max = np.max(photometry.crop(data_PSF, 20))
-   
+
     print('Maximum pixel value inside a box of 40x40 pixels around the center:')
     print(pixel_max)
     print("%s images have not been used because there were no corresponding" \
            " objects in the catalog") % not_found
+    if mcombine_boolean and psf_type == 'sdss':
+        os.rmdir(sexdir)
+    if mcombine_boolean and psf_type == 'hubble':
+        os.rmdir(tmp_GALFIT)
 
 
 if __name__ == '__main__':

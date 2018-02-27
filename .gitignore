@@ -1,0 +1,12 @@
+#Annoying macOS file
+.DS_Store
+
+#Compiled files
+*.pyc
+
+#All folders
+*/
+!sextractor_defaultfiles/
+
+#All tarballs
+*.tar
