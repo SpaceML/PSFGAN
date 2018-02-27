@@ -254,8 +254,10 @@ def roou():
     print(pixel_max)
     print("%s images have not been used because there were no corresponding" \
            " objects in the catalog") % not_found
-    if mcombine_boolean:
+    if mcombine_boolean and data_type == 'sdss':
         os.rmdir(sexdir)
+    if mcombine_boolean and data_type == 'hubble':
+        os.rmdir(tmp_GALFIT)
 
 
 if __name__ == '__main__':
