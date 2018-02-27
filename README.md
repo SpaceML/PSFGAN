@@ -99,6 +99,7 @@ The following flags are available:
 ```bash
 python train.py
 ```
+The path ```stretch_setup``` in config.py should point to the directory containing the folder ```npy_input```. The folder ```npy_input``` should contain the training input data (.npy files) in a subfolder called ```train```.
 
 ### Run a trained model
 Modify the following constants in config.py.
@@ -109,3 +110,5 @@ Modify the following constants in config.py.
 python test.py --mode test
 ```
 Set the flag "mode" to "eval" if the validation data should be used instead of the test data.
+
+The path ```stretch_setup``` in config.py should point to the directory containing the folder ```npy_input```. The folder ```npy_input``` should contain the testing (validation) input data (.npy files) in a subfolder called ```train``` (```eval```).
