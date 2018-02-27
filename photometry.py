@@ -17,6 +17,13 @@ import random
 sex = 'sextractor'
 fields_core_path = conf.core_path+'/source/sdss/dr12/plates/'
 
+# Directories containing default files for SExtractor:
+SExtractor_default_files_path = ''
+if SExtractor_default_files_path == '':
+    logging.warn('In photometry.py : no path provided to SExtractor default'\
+                 'files. This might raise an error if trying to extract stars'\
+                 'for creating a PSF')
+
 def calc_zeropoint(exposure_time, calibration_factor):
     return 22.5 + 2.5 * np.log10(1. / exposure_time / calibration_factor)
 
@@ -156,7 +163,7 @@ def get_stars_from_field(tmp_path, field_filename, SExtractor_params,
     file_res.write('DETECT_THRESH    5              # <sigmas> or <threshold>,<ZP> in mag.arcsec-2\n')
     file_res.write('ANALYSIS_THRESH  {}             # <sigmas> or <threshold>,<ZP> in mag.arcsec-2\n\n'.format(SExtractor_params['threshold']))
     file_res.write('FILTER           Y              # apply filter for detection (Y or N)?\n')
-    file_res.write('FILTER_NAME      /mnt/ds3lab/dostark/sextractor_defaultfiles/default.conv   # name of the file containing the filter\n\n')
+    file_res.write('FILTER_NAME      %s/default.conv   # name of the file containing the filter\n\n' %SExtractor_default_files_path)
     file_res.write('DEBLEND_NTHRESH  32             # Number of deblending sub-thresholds \n')
     file_res.write('DEBLEND_MINCONT  0.005          # Minimum contrast parameter for deblending\n\n')
     file_res.write('CLEAN            Y              # Clean spurious detections? (Y or N)?\n')
@@ -177,7 +184,7 @@ def get_stars_from_field(tmp_path, field_filename, SExtractor_params,
     file_res.write('PIXEL_SCALE      {}             # size of pixel in arcsec (0=use FITS WCS info)\n\n'.format(SExtractor_params['pixel_scale']))
     file_res.write('# ------------------------- Star/Galaxy Separation ----------------------------\n\n')
     file_res.write('SEEING_FWHM      {}             # stellar FWHM in arcsec\n'.format(SExtractor_params['fwhm']))
-    file_res.write('STARNNW_NAME     /mnt/ds3lab/dostark/sextractor_defaultfiles/default.nnw  # Neural-Network_Weight table filename\n\n')
+    file_res.write('STARNNW_NAME     %s/default.nnw  # Neural-Network_Weight table filename\n\n' %SExtractor_default_files_path)
     file_res.write('# ------------------------------ Background -----------------------------------\n\n')
     file_res.write('BACK_SIZE        64              # Background mesh: <size> or <width>,<height>\n')
     file_res.write('BACK_FILTERSIZE  3               # Background filter: <size> or <width>,<height>\n\n')
@@ -187,7 +194,7 @@ def get_stars_from_field(tmp_path, field_filename, SExtractor_params,
     file_res.write('                                 # MINIBACKGROUND, MINIBACK_RMS, -BACKGROUND,\n')
     file_res.write('                                 # FILTERED, OBJECTS, -OBJECTS, SEGMENTATION,\n')
     file_res.write('                                 # or APERTURES\n')
-    file_res.write('CHECKIMAGE_NAME  /mnt/ds3lab/dostark/sextractor_defaultfiles/check.fits     # Filename for the check-image\n\n')
+    file_res.write('CHECKIMAGE_NAME  %s/check.fits     # Filename for the check-image\n\n' %SExtractor_default_files_path)
     file_res.write('#--------------------- Memory (change with caution!) -------------------------\n\n')
     file_res.write('MEMORY_OBJSTACK  3000            # number of objects in stack\n')
     file_res.write('MEMORY_PIXSTACK  300000          # number of pixels in stack\n')
