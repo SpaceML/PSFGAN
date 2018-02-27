@@ -10,6 +10,7 @@ import photometry
 from config import Config as conf
 import normalizing
 import astropy.table as astrotable
+import logging
 
 parser = argparse.ArgumentParser()
 # Path to directory where SExtractor should save the temporary files.
@@ -17,8 +18,14 @@ tmpdir_for_SExtractor = '/mnt/ds3lab/dostark/z_'+str(conf.redshift)+\
                         '/r-band/tmp_for_SExtractor_'+str(conf.ext)+\
                         '_'+str(conf.stretch_type)+'_'+\
                         str(conf.scale_factor)+'/'
+
+# Path to the 'read_PSF' SDSS PSF tool : http://www.sdss.org/dr12/algorithms/read_psf/
+psfTool_path = ''
+if psfTool_path == '':
+    logging.warn('In roou.py : no path provided to your SDSS PSF tool.'\
+                 'This might raise an error if trying to add a SDSS PSF')
+
 # Path to PSF metadata (psFields) which the SDSS PSF tool uses as input.
-psfTool_path = '/mnt/ds3lab/blaunet/readAtlasImages-v5_4_11/read_PSF'
 psfFields_dir = '/mnt/ds3lab/galaxian/source/sdss/dr12/psf-data'
 # Path to Hubble PSF if used:
 

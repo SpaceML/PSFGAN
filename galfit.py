@@ -1,10 +1,14 @@
 import numpy as np
 import astropy.io.fits as fits
-import photometry
 import os
 import glob
-
-galfit_path = '/mnt/ds3lab/dostark/galfit_binaries/galfit'
+import logging
+# Path to your GALFIT binary, needed to create a dataset based on SDSS data
+galfit_path = ''
+if galfit_path == '':
+    logging.warn('In galfit.py : no path provided to your GALFIT binary.'\
+                 'This might raise an error if trying to fit a PSF')
+import photometry
 
 
 def create_feedme_PSF(feedmefile, ifile, resultfile, ipath, platescale, centroid, imshape):
