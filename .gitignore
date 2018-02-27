@@ -5,7 +5,7 @@
 *.pyc
 
 #All folders
-*/
+#*/
 
 #All tarballs
 *.tar
