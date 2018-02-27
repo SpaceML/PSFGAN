@@ -1,0 +1,11 @@
+#Annoying macOS file
+.DS_Store
+
+#Compiled files
+*.pyc
+
+#All folders
+*/
+
+#All tarballs
+*.tar
