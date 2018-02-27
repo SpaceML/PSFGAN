@@ -18,11 +18,7 @@ sex = 'sextractor'
 fields_core_path = conf.core_path+'/source/sdss/dr12/plates/'
 
 # Directories containing default files for SExtractor:
-SExtractor_default_files_path = ''
-if SExtractor_default_files_path == '':
-    logging.warn('In photometry.py : no path provided to SExtractor default'\
-                 'files. This might raise an error if trying to extract stars'\
-                 'for creating a PSF')
+SExtractor_default_files_path = conf.core_path +'/sextractor_defaultfiles/'
 
 def calc_zeropoint(exposure_time, calibration_factor):
     return 22.5 + 2.5 * np.log10(1. / exposure_time / calibration_factor)
