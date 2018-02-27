@@ -2,6 +2,7 @@ import numpy as np
 from astropy.io import fits
 import os
 import galfit
+from galfit import galfit_path as galfit_command
 from config import Config as conf
 from photutils import centroid_com
 import photutils
@@ -14,8 +15,7 @@ from photutils import DAOStarFinder
 import random
 
 sex = 'sextractor'
-galfit_command = '/mnt/ds3lab/dostark/galfit_binaries/galfit'
-fields_core_path = '/mnt/ds3lab/dostark/galaxian/source/sdss/dr12/plates/'
+fields_core_path = conf.core_path+'/source/sdss/dr12/plates/'
 
 def calc_zeropoint(exposure_time, calibration_factor):
     return 22.5 + 2.5 * np.log10(1. / exposure_time / calibration_factor)
@@ -29,8 +29,8 @@ def mag_from_counts(counts, t_exp, zeropoint):
         print 'negative count value!!!'
         print '\n'
         return -999
-    
-    
+
+
 def crop(img, cut):
     """
     Crop the image to a cut*cut image centered on the center
@@ -55,7 +55,7 @@ def starphot(imdata, position, radius, r_in, r_out):
         imdata:   Numpy array containing the star.
         position: [x,y] coordinates where x corresponds to the second index of
                   imdata
-        radius:   Radius of the circular aperture used to compute the flux of 
+        radius:   Radius of the circular aperture used to compute the flux of
                   the star.
         r_in:     Inner radius of the annulus used to compute the background
                   mean.
@@ -64,30 +64,30 @@ def starphot(imdata, position, radius, r_in, r_out):
     Returns [flux, background variance, background mean]
     """
     try:
-        statmask = photutils.make_source_mask(imdata, snr=5, npixels=5, 
+        statmask = photutils.make_source_mask(imdata, snr=5, npixels=5,
                                               dilate_size=10)
     except TypeError:
         return None
     bkg_annulus = photutils.CircularAnnulus(position, r_in, r_out)
     bkg_phot_table = photutils.aperture_photometry(imdata, bkg_annulus,
-                                                   method='subpixel', 
+                                                   method='subpixel',
                                                    mask=statmask)
     bkg_mean_per_pixel = bkg_phot_table['aperture_sum'] / bkg_annulus.area()
     src_aperture = photutils.CircularAperture(position, radius)
-    src_phot_table = photutils.aperture_photometry(imdata, src_aperture, 
+    src_phot_table = photutils.aperture_photometry(imdata, src_aperture,
                                                    method='subpixel')
     signal = src_phot_table['aperture_sum'] - bkg_mean_per_pixel*\
                                               src_aperture.area()
     #noise_squared = signal + bkg_mean_per_pixel*src_aperture.area()
-    mean, median, std = sigma_clipped_stats(imdata, sigma=3.0, iters=5, 
+    mean, median, std = sigma_clipped_stats(imdata, sigma=3.0, iters=5,
                                             mask=statmask)
     noise_squared = std**2
     return float(str(signal.data[0])), noise_squared,\
            float(str(bkg_mean_per_pixel.data[0]))
-    
+
 def weighted_median(data, weights):
     """
-    This function omputes the weighted median of a sequence according to 
+    This function omputes the weighted median of a sequence according to
     https://en.wikipedia.org/wiki/Weighted_median.
     Args:
         data: 1d numpy array of data
@@ -105,8 +105,8 @@ def weighted_median(data, weights):
             elif sum + actual_weight == 0.5:
                 return 0.5*(sorted_data[i+1]+sorted_data[i])
         sum += actual_weight
-        
-        
+
+
 def weighted_median_stacking(images, weights):
     imshape = images[0].shape
     combined_image = np.zeros(imshape)
@@ -115,7 +115,7 @@ def weighted_median_stacking(images, weights):
             im_tmp = []
             for k in range(0, len(images)):
                 im_tmp.append(images[k][y, x])
-            combined_image[y, x] = weighted_median(np.array(im_tmp), 
+            combined_image[y, x] = weighted_median(np.array(im_tmp),
                                                    np.array(weights))
     return combined_image
 
@@ -124,25 +124,25 @@ def get_stars_from_field(tmp_path, field_filename, SExtractor_params,
                          imageshape, edge, mindist):
     """
     Args:
-        tmp_path:          Path to directory where temporary SExtractor files 
-                           should be saved. Those files are deleted after 
+        tmp_path:          Path to directory where temporary SExtractor files
+                           should be saved. Those files are deleted after
                            SExtractor has done its job.
-        field_filename:    Filename of the SDSS field (.fits image). This image 
+        field_filename:    Filename of the SDSS field (.fits image). This image
                            should be in tmp_path.
-        SExtractor_params: A dict of the used SExtractor input parameters, 
-                           denoted by the following keywords: magzero, 
+        SExtractor_params: A dict of the used SExtractor input parameters,
+                           denoted by the following keywords: magzero,
                            threshold, saturation_level, gain, pixel_scale, fwhm.
-        imageshape:        Shape (y, x) of the field image where the first 
+        imageshape:        Shape (y, x) of the field image where the first
                            index corresponds to the length in y direction and
-                           the second index to the length in x direction. 
+                           the second index to the length in x direction.
         edge:              Margin where no stars are selected.
         mindist:           Minimal distance to other detections a star must
                            have in order to be selected.
     Returns:
-        Returns the coordinates of the selected stars as an array of 
+        Returns the coordinates of the selected stars as an array of
         x-coordinates and an array of y-coordinates. Also returns the fluxes of
-        the stars in an array of the same order. Finally returns a bool that 
-        indicates whether stars have been found at all.     
+        the stars in an array of the same order. Finally returns a bool that
+        indicates whether stars have been found at all.
     """
     file_res = open(tmp_path + 'sex_stars.conf', "w")
     file_res.write('#-------------------------------- Catalog ------------------------------------\n\n')
@@ -212,8 +212,8 @@ def get_stars_from_field(tmp_path, field_filename, SExtractor_params,
     # run SExtractor & read results
     os.system('cd '+tmp_path+ ' ; '+sex+' -c sex_stars.conf '+field_filename)
     try:
-        data = np.genfromtxt(tmp_path+'sex_stars.cat',dtype=None,comments='#', 
-                             names=['number', 'x', 'y', 'flux', 'classifier', 
+        data = np.genfromtxt(tmp_path+'sex_stars.cat',dtype=None,comments='#',
+                             names=['number', 'x', 'y', 'flux', 'classifier',
                                     'fwhm', 'flags'])
     except IOError:
         return [], [], [], False
@@ -236,7 +236,7 @@ def get_stars_from_field(tmp_path, field_filename, SExtractor_params,
             if np.sqrt((x_data[i]-x_data[j])**2 +
                        (y_data[i]-y_data[j])**2) < mindist:
                 star_class_data[i] = 0
-                star_class_data[j] = 0  
+                star_class_data[j] = 0
         if fwhm_deviations_from_min[i] > 4:
             star_class_data[i] = 0
     starmask = star_class_data >= 0.9
@@ -264,14 +264,14 @@ def run_sdss_psftool(obj_line, psf_fname, SDSStool_path, psFields_path):
     # Get the input parameters for the tool.
     psfTool_path = '%s/read_PSF' % SDSStool_path
     psfFields_dir_1 = psFields_path
-    
+
     filter_string = conf.filter_
     run = obj_line['run'].item()
     rerun = obj_line['rerun'].item()
     camcol = obj_line['camcol'].item()
     field = obj_line['field'].item()
 
-    psfField = '%s/psField-%06d-%d-%04d.fit' % (psfFields_dir_1, run, camcol, 
+    psfField = '%s/psField-%06d-%d-%04d.fit' % (psfFields_dir_1, run, camcol,
                                                 field)
     if not os.path.exists(psfField):
         psfField = '%s/%d/%d/objcs/%d/psField-%06d-%d-%04d.fit' % (
@@ -284,8 +284,8 @@ def run_sdss_psftool(obj_line, psf_fname, SDSStool_path, psFields_path):
     filter_dic = {'u': 1, 'g':2, 'r':3, 'i':4, 'z':5}
 
     # Run the code and read in the output image.
-    os.system('%s %s %s %s %s %s' % (psfTool_path, psfField, 
-                                     filter_dic[filter_string], rowc, colc, 
+    os.system('%s %s %s %s %s %s' % (psfTool_path, psfField,
+                                     filter_dic[filter_string], rowc, colc,
                                      psf_fname))
     try:
         hdu = fits.open(psf_fname)
@@ -305,7 +305,7 @@ def get_field(obj_line):
     ATTENTION: This function requires the directories containing the SDSS fields
     to be structured in a specific way!.
     Args_
-        obj_line:  Dictionary containing the following SDSS parameters keywords: 
+        obj_line:  Dictionary containing the following SDSS parameters keywords:
                    run, rerun, camcol, field, colc, rowc.
     Returns:
         Returns the desired SDSS field as a numpy array.
@@ -317,25 +317,26 @@ def get_field(obj_line):
     camcol = obj_line['camcol'].item()
     field = obj_line['field'].item()
     relative_path = '%s/%s' %(run, camcol)
-    
-    if not os.path.isfile('%s%s/sdss%s_dr12_%s-%s.fits.bz2' % (core_path, 
+
+    if not os.path.isfile('%s%s/sdss%s_dr12_%s-%s.fits.bz2' % (core_path,
                                                                relative_path,
                                                                filter_string,
                                                                run, field)):
-        os.system('cd %s; rsync --relative -avzh dostark@plompy.ethz.ch:/home/'+
-            'galaxian/source/sdss/dr12/plates/./%s/sdss%s_dr12_%s-%s.fits.bz2 .'
-            % (core_path, relative_path, filter_string, run, field))
-    os.system('cd %s%s; bzip2 -dk sdss%s_dr12_%s-%s.fits.bz2' % (core_path, 
+        raise OSError('File sdss%s_dr12_%s-%s.fits.bz2 not found in %s'%(relative_path,
+                                                                         filter_string,
+                                                                         run, field,
+                                                                         core_path))
+    os.system('cd %s%s; bzip2 -dk sdss%s_dr12_%s-%s.fits.bz2' % (core_path,
                                                                  relative_path,
                                                                  filter_string,
                                                                  run, field))
     try:
-        data = fits.getdata('%s%s/sdss%s_dr12_%s-%s.fits' % (core_path, 
+        data = fits.getdata('%s%s/sdss%s_dr12_%s-%s.fits' % (core_path,
                                                              relative_path,
                                                              filter_string,
                                                              run, field))
         os.system('rm %s%s/sdss%s_dr12_%s-%s.fits' % (core_path, relative_path,
-                                                      filter_string, run, 
+                                                      filter_string, run,
                                                       field))
     except IOError:
         print 'file does not exist'
@@ -364,7 +365,7 @@ def GALFIT_fit_stars(tmpdir, data, phot_zeropoint, platescale, mag_guess,
     hdu_output = fits.PrimaryHDU(data)
     hdulist_output = fits.HDUList([hdu_output])
     hdulist_output.writeto(tmpdir+'star.fits', overwrite=True)
-    
+
     file_res = open(tmpdir + 'galfit.feedme', "w")
     file_res.write('# IMAGE and GALFIT CONTROL PARAMETERS \n')
     file_res.write('A)  ' + 'star.fits            # Input data image (FITS file) \n')
@@ -382,7 +383,7 @@ def GALFIT_fit_stars(tmpdir, data, phot_zeropoint, platescale, mag_guess,
     file_res.write('P)  ' + '0                               #Choose: 0=optimize, 1=model, 2=imgblock, 3=subcomps \n')
     file_res.write('# \n\n')
     file_res.write('# \n\n')
-    
+
     file_res.write('# Component number 1\n')
     file_res.write('0)  ' + 'gaussian \n')
     file_res.write('1)  ' + str(data.shape[1]/2) + '  ' + str(data.shape[0]/2) + '  1  1           # position x, y        [pixel] \n')
@@ -392,7 +393,7 @@ def GALFIT_fit_stars(tmpdir, data, phot_zeropoint, platescale, mag_guess,
     file_res.write('Z)  ' + '0 \n')
     file_res.write('# \n')
     file_res.write('# \n')
-    
+
     file_res.write('# Sky Component\n')
     file_res.write('0)  ' + 'sky                #  object type \n')
     file_res.write('1)  ' + '0  1            #  sky background at center of fitting region [ADUs] \n')
@@ -400,9 +401,9 @@ def GALFIT_fit_stars(tmpdir, data, phot_zeropoint, platescale, mag_guess,
     file_res.write('3)  ' + '0.000  0              #  dsky/dy (sky gradient in y) \n')
     file_res.write('Z) ' + '1 \n')  # output option (0 = resid., 1 = Don't subtract)
     file_res.close()
-    
+
     output = subprocess.check_output(["cd "+str(tmpdir)+" ; "+galfit_command+
-                                      " galfit.feedme"], shell=True, 
+                                      " galfit.feedme"], shell=True,
                                       stderr=subprocess.STDOUT)
     try:
         hdu= fits.open(tmpdir+'result.fits')
@@ -415,7 +416,7 @@ def GALFIT_fit_stars(tmpdir, data, phot_zeropoint, platescale, mag_guess,
     os.remove(tmpdir+'result.fits')
     os.remove(tmpdir+'star.fits')
     os.remove(tmpdir+'fit.log')
-    os.remove(tmpdir+'galfit.01')                      
+    os.remove(tmpdir+'galfit.01')
     return X, Y
 
 
@@ -450,17 +451,17 @@ def empirical_PSF(data, x_icords, y_icords, cutout_size, fwhm_pix, galfit_tmp,
     integrated_counts = []
     cutout_size_tmp = cutout_size + 5
     for j in range(0, len(x_icords)):
-        cutout_candidate = data[int(y_icords[j]) - cutout_size_tmp: 
-                                int(y_icords[j]) + cutout_size_tmp+1, 
-                                int(x_icords[j]) - cutout_size_tmp: 
+        cutout_candidate = data[int(y_icords[j]) - cutout_size_tmp:
+                                int(y_icords[j]) + cutout_size_tmp+1,
+                                int(x_icords[j]) - cutout_size_tmp:
                                 int(x_icords[j]) + cutout_size_tmp+1]
         # Test if cutout is empty (sometimes occurs for the goods-s data):
         if np.mean(cutout_candidate)==0.0:
             continue
         # Double check wheter there is a star in the center of the cutout.
         mean, median, std = sigma_clipped_stats(cutout_candidate, sigma=3.0,
-                                                iters=5)  
-        daofind = DAOStarFinder(fwhm=fwhm_pix, threshold=5.*std) 
+                                                iters=5)
+        daofind = DAOStarFinder(fwhm=fwhm_pix, threshold=5.*std)
         sources = daofind(cutout_candidate - median)
         detections_x = np.array(sources['xcentroid'])
         detections_y = np.array(sources ['ycentroid'])
@@ -475,7 +476,7 @@ def empirical_PSF(data, x_icords, y_icords, cutout_size, fwhm_pix, galfit_tmp,
 
         xc.append(fit_params[0])
         yc.append(fit_params[1])
-        starphot_results = starphot(cutouts[-1], fit_params, fwhm_pix*3, 
+        starphot_results = starphot(cutouts[-1], fit_params, fwhm_pix*3,
                                     r_in=fwhm_pix*3, r_out=cutout_size_tmp-1)
         if starphot_results:
             S, N2 = starphot_results[0], starphot_results[1]
@@ -483,7 +484,7 @@ def empirical_PSF(data, x_icords, y_icords, cutout_size, fwhm_pix, galfit_tmp,
         else:
             return None
         weights.append(S/N2)
-    
+
     #recentering
     i = 0
     weights_final = []
@@ -510,7 +511,7 @@ def empirical_PSF(data, x_icords, y_icords, cutout_size, fwhm_pix, galfit_tmp,
 
 
 def add_sdss_PSF(origpath, original, psf_flux, obj_line, SDSStool_path,
-                 psFields_path, sexdir=None, median_combine=False, 
+                 psFields_path, sexdir=None, median_combine=False,
                  save_psf=False):
     """
     Args:
@@ -522,7 +523,7 @@ def add_sdss_PSF(origpath, original, psf_flux, obj_line, SDSStool_path,
         SDSStool_path:  Path to SDSS tool (stand alone code) executable.
         psFields_path: Path to PSF meda data (psFields).
         sexdir:        Path where temporary SExtractor files should be saved.
-                       This directory is emptied after SExtractor has done its 
+                       This directory is emptied after SExtractor has done its
                        job.
     """
     SDSS_psf_dir = '%s/psf/SDSS' % conf.run_case
@@ -532,14 +533,14 @@ def add_sdss_PSF(origpath, original, psf_flux, obj_line, SDSStool_path,
         os.makedirs(SDSS_psf_dir)
     if not os.path.exists(GALFIT_psf_dir):
         os.makedirs(GALFIT_psf_dir)
-    
+
     obj_id = obj_line['dr7ObjID'].item()
     SDSS_psf_filename = '%s/%s-%s.fits' % (SDSS_psf_dir, obj_id, filter_string)
     GALFIT_psf_filename = '%s/%s-%s.fits' % (GALFIT_psf_dir, obj_id,
                                              filter_string)
     if not os.path.exists(GALFIT_psf_filename):
         if not os.path.exists(SDSS_psf_filename):
-            run_sdss_psftool(obj_line, SDSS_psf_filename, SDSStool_path, 
+            run_sdss_psftool(obj_line, SDSS_psf_filename, SDSStool_path,
                              psFields_path)
         # Fit the SDSS tool PSF with 3 gaussians to get rid of the noise.
         psf = galfit.fit_PSF_GALFIT(SDSS_psf_filename, GALFIT_psf_dir)
@@ -576,58 +577,58 @@ def add_sdss_PSF(origpath, original, psf_flux, obj_line, SDSStool_path,
         fwhm = 1.4
         zeropoint = calc_zeropoint(exptime, nmgy_per_count)
         sex_edge = 26
-        SExtractor_params={'exptime': exptime, 'threshold': threshold, 
+        SExtractor_params={'exptime': exptime, 'threshold': threshold,
                            'saturation_level': saturation_limit, 'gain': gain,
-                           'pixel_scale': pixel_scale, 'fwhm': fwhm, 
+                           'pixel_scale': pixel_scale, 'fwhm': fwhm,
                            'magzero': zeropoint}
         x_coordinates, y_coordinates, fluxes, starboolean = \
                                       get_stars_from_field(sexdir,
-                                                           'field_ADU.fits', 
+                                                           'field_ADU.fits',
                                                            SExtractor_params,
                                                            field_data.shape,
-                                                           sex_edge, 
+                                                           sex_edge,
                                                            mindist=40)
         if not starboolean:
             files_to_delete = glob.glob(sexdir+'*')
             for f in files_to_delete:
                 os.remove(f)
             return None
-        
-       
+
+
         csize = 20
         fluxes = fluxes*nmgy_per_count
-        fluxmask = fluxes > 0  
+        fluxmask = fluxes > 0
         mag_guesses = []
         for f in fluxes:
-            mag_guesses.append(mag_from_counts(f/nmgy_per_count, 
+            mag_guesses.append(mag_from_counts(f/nmgy_per_count,
                                                exptime, zeropoint))
         mag_guesses = np.array(mag_guesses)
         # get median combined PSF
-        psf_unscaled = empirical_PSF(field_data, x_coordinates[fluxmask], 
-                                     y_coordinates[fluxmask], csize, 
-                                     fwhm/pixel_scale, sexdir, 
-                                     mag_guesses[fluxmask], zeropoint, 
+        psf_unscaled = empirical_PSF(field_data, x_coordinates[fluxmask],
+                                     y_coordinates[fluxmask], csize,
+                                     fwhm/pixel_scale, sexdir,
+                                     mag_guesses[fluxmask], zeropoint,
                                      pixel_scale)
         if psf_unscaled is None:
             files_to_delete = glob.glob(sexdir+'*')
             for f in files_to_delete:
                 os.remove(f)
             return None
-        
+
         # compute statistics to subtract the background
         psf_centroid = [csize, csize]
         try:
-            statmask = photutils.make_source_mask(psf_unscaled, snr=5, 
+            statmask = photutils.make_source_mask(psf_unscaled, snr=5,
                                                   npixels=5, dilate_size=10)
         except TypeError:
             files_to_delete = glob.glob(sexdir+'*')
             for f in files_to_delete:
                 os.remove(f)
             return None
-        bkg_annulus = photutils.CircularAnnulus(psf_centroid, 3*fwhm / 
+        bkg_annulus = photutils.CircularAnnulus(psf_centroid, 3*fwhm /
                                                 pixel_scale, 20)
-        bkg_phot_table = photutils.aperture_photometry(psf_unscaled, 
-                                                       bkg_annulus, 
+        bkg_phot_table = photutils.aperture_photometry(psf_unscaled,
+                                                       bkg_annulus,
                                                        method='subpixel',
                                                        mask = statmask)
         bkg_mean_per_pixel = bkg_phot_table['aperture_sum'] / bkg_annulus.area()
@@ -640,22 +641,22 @@ def add_sdss_PSF(origpath, original, psf_flux, obj_line, SDSStool_path,
                                                           src_aperture.area()
         scale_factor = psf_flux / flux_photutils
         psf = scale_factor * (psf_unscaled-bkg_mean_per_pixel)
-            
+
         files_to_delete = glob.glob(sexdir+'*')
         for f in files_to_delete:
             os.remove(f)
 
-    # else <==> median_combine==False              
+    # else <==> median_combine==False
     else:
-        # Use the 3 gaussian fit of the PSF generated by the SDSS PSF tool. 
+        # Use the 3 gaussian fit of the PSF generated by the SDSS PSF tool.
         psf = psf / psf.sum()
         psf = psf * psf_flux
-    
+
     center = [original.shape[1] // 2, original.shape[0] // 2]
     centroid_galaxy = find_centroid(original)
     centroid_PSF = find_centroid(psf)
 
-    composite_image = np.copy(original)    
+    composite_image = np.copy(original)
 
     gal_x = int(centroid_galaxy[0])
     gal_y = int(centroid_galaxy[1])
@@ -688,27 +689,25 @@ def add_hubble_PSF(origpath, original, psf_flux, santinidir=None,
                        positions of stars if median_combine is True.
         median_combine:Bool specifying wheter a single Hubble PSF is used
                        (median_combine=False) or a position dependent PSF is
-                       extracted by median combining stars 
+                       extracted by median combining stars
                        (median_combine=True).
         psfdir:        Path to Hubble PSF. This is necessary if median_combine
                        is set to False.
-        RA/DEC:        Coordinates of the galaxy in degrees. This is used to 
+        RA/DEC:        Coordinates of the galaxy in degrees. This is used to
                        select stars from the neighbourhood if median_combine is
                        set to True.
-        GALFIT_tmpdir: Path to directory where temporary files for GALFIT are 
+        GALFIT_tmpdir: Path to directory where temporary files for GALFIT are
                        saved. GALFIT is only run if median_combine is set to
                        True and all the temporary files will be deleted after
                        they have been used.
         save_psf:      True if PSF should be saved for each image.
     """
     # If the PSF used for the fake AGN has to be saved (save_psf==True):
-    psf_save_path = '/mnt/ds3lab/dostark/hubble_z_1.25/h-band/'
-                    +'psf_test_set_many_stars/'
+    psf_save_path = conf.run_case+'/psf_used/'
     pixel_scale = 0.06
     fwhm = 0.18
     if median_combine:
-        path_to_field = "/mnt/ds3lab/dostark/hubble_z_1.25/h-band/" \
-                        "hlsp_candels_hst_wfc3_gs-tot_f160w_v1.0_drz.fits"
+        path_to_field = conf.run_case+"/hlsp_candels_hst_wfc3_gs-tot_f160w_v1.0_drz.fits"
         if not os.path.isdir(GALFIT_tmpdir):
             os.makedirs(GALFIT_tmpdir)
         table = astrotable.Table.read(santinidir)
@@ -727,7 +726,7 @@ def add_hubble_PSF(origpath, original, psf_flux, santinidir=None,
         df_bright = df_stars[SNR_mask]
         numpy_ra = np.array(df_bright['RAdeg'])
         numpy_dec = np.array(df_bright['DECdeg'])
-        [x_crds, y_crds] = w.wcs_world2pix(numpy_ra, numpy_dec, 0, 
+        [x_crds, y_crds] = w.wcs_world2pix(numpy_ra, numpy_dec, 0,
                                            ra_dec_order=True)
         neighbor_mask_size = 4000
         neighbor_mask = np.array(np.ones(len(numpy_ra), dtype=bool))
@@ -740,23 +739,23 @@ def add_hubble_PSF(origpath, original, psf_flux, santinidir=None,
         y_coordinates = y_crds[neighbor_mask]
         h_mags = np.array(df_selected['Hmag'])
         print str(len(x_coordinates)) + ' stars selected.'
-        
+
         csize = 40
         # get median combined PSF
-        psf_unscaled = empirical_PSF(field_hdu.data, x_coordinates, 
+        psf_unscaled = empirical_PSF(field_hdu.data, x_coordinates,
                                      y_coordinates, csize, fwhm/pixel_scale,
-                                     GALFIT_tmpdir, h_mags, 
+                                     GALFIT_tmpdir, h_mags,
                                      phot_zeropoint=25.9463,
                                      pixel_scale=pixel_scale)
-        
+
         files_to_delete = glob.glob(GALFIT_tmpdir+'*')
         for f in files_to_delete:
             os.remove(f)
-        
+
         if psf_unscaled is None:
             return None
 
-    else: # else <==> median_combine==False 
+    else: # else <==> median_combine==False
         if psfdir=='/mnt/ds3lab/dostark/PSFSTD_WFC3IR_F160W.fits':
             index = random.randint(0, 8)
             print index
@@ -765,18 +764,18 @@ def add_hubble_PSF(origpath, original, psf_flux, santinidir=None,
         else:
             psf_unscaled = fits.getdata(psfdir)
         csize = 40
-    
+
     if median_combine:
         # compute statistics to subtract the background
         psf_centroid = [csize, csize]
         try:
-            statmask = photutils.make_source_mask(psf_unscaled, snr=5, 
+            statmask = photutils.make_source_mask(psf_unscaled, snr=5,
                                                   npixels=5, dilate_size=10)
         except TypeError:
             return None
         bkg_annulus = photutils.CircularAnnulus(psf_centroid, 25, 40)
-        bkg_phot_table = photutils.aperture_photometry(psf_unscaled, 
-                                                       bkg_annulus, 
+        bkg_phot_table = photutils.aperture_photometry(psf_unscaled,
+                                                       bkg_annulus,
                                                        method='subpixel',
                                                        mask = statmask)
         bkg_mean_per_pixel = bkg_phot_table['aperture_sum'] / bkg_annulus.area()
@@ -793,17 +792,17 @@ def add_hubble_PSF(origpath, original, psf_flux, santinidir=None,
     else:
         scale_factor = psf_flux / psf_unscaled.sum()
         psf = scale_factor * psf_unscaled
-    
+
     if save_psf:
         hdu = fits.PrimaryHDU(psf_unscaled-bkg_mean_per_pixel)
         hdu.writeto(psf_save_path+os.path.basename(origpath), overwrite=True)
-    
+
     # add scaled PSF to the center of the galaxy
     center = [original.shape[1] // 2, original.shape[0] // 2]
     centroid_galaxy = find_centroid(original)
     centroid_PSF = find_centroid(psf)
 
-    composite_image = np.copy(original)    
+    composite_image = np.copy(original)
 
     gal_x = int(centroid_galaxy[0])
     gal_y = int(centroid_galaxy[1])
