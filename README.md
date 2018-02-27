@@ -11,6 +11,8 @@ We further use the following tools to create training and testing sets:
 <tt>GALFIT</tt>, <tt>Source Extractor</tt>, SDSS PSF tool ("Stand Alone Code" downloaded from http://www.sdss.org/dr12/algorithms/read_psf/)
 
 ## Dependencies
+The code currently runs on <tt>python 2.7</tt> but we are working on making it compatible for new versions of python.
+
 Training requires the following python packages: <tt>tensorflow</tt>, <tt>numpy</tt>
 
 Testing requires the following python packages: <tt>tensorflow</tt>, <tt>numpy</tt>, <tt>astropy</tt> (testing output is saved as a .fits file)
@@ -25,12 +27,6 @@ cd  PSFGAN/
 ```
 
 ## Run our code
-The first step always is modifying the file config.py. The most important parameters are the following:
-* ```core_path```: Path to directory containing all the subdirectories.
-* ```redshift```: Unique redshift identifier used for naming the subdirectories.
-* ```filter_```: Unique identifier to distinguish images observed in different filters.
-* ```model_path```: Path to .ckpt file of pretrained model used in test.py. Should be an empty string if PSFGAN is used in training mode.
-* ```use_gpu```: Value that "CUDA_VISIBLE_DEVICES" should be set to.
 
 ### Create training/validation/testing sets
 *If you already have training/testing data or you are applying PSFGAN to real data, you can skip everything described in this section.*
@@ -38,13 +34,17 @@ The first step always is modifying the file config.py. The most important parame
 The code assumes a directory structure like the following.
 ```bash
 core_path/
-├── z_0.1
-│   └── r-band
-│       ├── catalog_z_0.095_0.105.csv
-│       ├── fit_eval
-│       ├── fits_test
-│       └── fits_train
-└── z_0.05
+├── config.py
+├── data.py
+├── galfit.py
+├── model.py
+├── normalizing.py
+├── photometry.py
+├── roou.py
+├── test.py
+├── train.py
+├── utils.py
+└── z_0.1
     └── r-band
         ├── catalog_z_0.045_0.055.csv
         ├── fits_eval
@@ -53,25 +53,47 @@ core_path/
 ```
 In this example there are two subfolders containing training, testing and validation images and a catalog. For SDSS data the catalog must contain a column with the SDSS objids and a column with the SDSS keyword "cModelFlux" (host galaxy flux in nanomaggies). 
 
-The script roou.py then takes the original .fits images from one of the three folders (fits_eval, fits_test, fits_train) and adds simulated AGN point sources to the galaxies in their centers. It also preprocesses the images, and saves them as .npy files so that they can be importet by the GAN.
+The script roou.py then takes the original images from one of the three folders (fits_eval, fits_test, fits_train) and adds simulated AGN point sources to the galaxies in their centers. It also preprocesses the images, and saves them as .npy files so that they can be importet by the GAN.
+
+The first step is modifying config.py. The parameters relevant for creating a training/testing/validation set are the following.
+* ```redshift```: Unique identifier used to distinguish different datasets by redshift.
+* ```filter_```: Unique identifier to distinguish different datasets by filters.
+* ```ext```: Custom extension for folders to differentiate setups. This allows a User to create different test sets from the same original images.
+* ```stretch_type``` and ```scale_factor```: Normalization function (and its parameter) applied to the images before saving them as .npy input for the GAN.
+* ```pixel_min_value``` and  ```pixel_max_value```: Minimum and maximum pixel value accross the whole set of images. This is used for the normalization.
+* ```uniform_logspace```: A boolean specifying wheter the contrast ratio should be distributed uniformly in linear or in logarithmic space.
+
 
 You should modify some paths in roou.py:
-* ```tmpdir_for_SExtractor```: Directory where temporary files for SExtractor are saved. This is only needed if the flag "mcombine" is set to 1.
-* ```psfTool_path: Directory``` containing the executable of the SDSS PSF tool path.
+* ```psfTool_path```: Directory containing the executable of the SDSS PSF tool path.
 * ```psfFields_dir```: Directory containing the SDSS PSF metadata (psFields). This data is used as input for the SDSS PSF tool. 
 
-Then you should modify some paths in photometry.py
-* ```galfit_command```: Path to <tt>GALFIT</tt> executables.
+Then you should modify a path in photometry.py
 * ```fields_core_path```: Path to parent directory containing the SDSS fields (structured according to "run" and "camcol")
 
-Then you can run roou.py:
+Finally you should modify a path in galfit.py
+* ```galfit_path```: Path to your <tt>GALFIT</tt> binary file.
 
+
+Then you can run roou.py. To create a training set, use:
 ```bash
-python roou.py --mode 1 --mcombine 1     # Create a test and median combine stars to extract the PSF.
+python roou.py --mode 0    # Create a training set. Fit the SDSS tool PSF by three gaussians to model the PSF.
+
 ```
 
+To create a test set, use:
+```bash
+python roou.py --mode 1 --mcombine 1    # Create a test set. Model the PSF by median-combining stars.
+```
+
+The following flags are available:
 * ```mode```: If set to 0, the images from "fits_train" are used; if set to 1, the images from "fits_test" are used; if set to 2, the images from "fits_eval" are used.
 * ```mcombine```: If set to False, the SDSS PSF tool is used to extract a PSF for each image. If mcombine is set to True, the PSF is extracted by median combining stars from the neighborhood of the galaxy.
+* ```data_type```: If SDSS is used, ```data_type``` should be set to ```'sdss'```. If Hubble WFC3 F160W data is used, is should be set to ```'hubble'```.
+* ```psf```: Whether the SDSS PSF or the Hubble PSF should be used to create fake AGN point sources.
+* ```crop```: If set to 1, the GAN input (and output) images are cropped.
+* ```save_psf```: If set to 1, for each galaxy the modeled PSF is saved as a .fits file.
+
 
 ### Train PSFGAN
 ```bash
@@ -79,8 +101,11 @@ python train.py
 ```
 
 ### Run a trained model
-Before you run test.py you should modifiy "model_path" in config.py. Set the flag "mode" to "eval" if the validation data should be used instead of the test data.
+Modify the following constants in config.py.
+* ```model_path```: Path to .ckpt file of pretrained model used in test.py. Should be an empty string if PSFGAN is used in training mode.
+* ```use_gpu```: Value that "CUDA_VISIBLE_DEVICES" should be set to.
 
 ```bash
 python test.py --mode test
 ```
+Set the flag "mode" to "eval" if the validation data should be used instead of the test data.
