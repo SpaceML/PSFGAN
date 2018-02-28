@@ -8,7 +8,6 @@ from astropy.io import fits
 from scipy.stats import norm
 import photometry
 from config import Config as conf
-import normalizing
 import astropy.table as astrotable
 import logging
 
@@ -242,12 +241,8 @@ def roou():
             hdu.writeto(raw_name, overwrite=True)
 
         # Preprocessing
-        Normalizer = normalizing.Normalizer(stretch_type=conf.stretch_type,
-                                            scale_factor=conf.scale_factor,
-                                            min_value=conf.pixel_min_value,
-                                            max_value=conf.pixel_max_value)
-        figure_original = Normalizer.stretch(figure_original)
-        figure_with_PSF = Normalizer.stretch(figure_with_PSF)
+        figure_original = conf.stretch(figure_original)
+        figure_with_PSF = conf.stretch(figure_with_PSF)
 
         # output result to pix2pix format
         figure_combined = np.zeros((figure_original.shape[0],

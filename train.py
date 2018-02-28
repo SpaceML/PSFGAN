@@ -4,7 +4,6 @@ import tensorflow as tf
 from astropy.io import fits
 from data import *
 from model import CGAN
-import normalizing
 
 def prepocess_train(img, cond):
     # img = scipy.misc.imresize(img, [conf.adjust_size, conf.adjust_size])
@@ -90,11 +89,7 @@ def train(evalset):
                     gen_img = sess.run(model.gen_img, feed_dict={model.image: pimg, model.cond: pcond})
                     gen_img = gen_img.reshape(gen_img.shape[1:])
 
-                    Normalizer = normalizing.Normalizer(stretch_type=conf.stretch_type,
-                                            scale_factor=conf.scale_factor,
-                                            min_value=conf.pixel_min_value,
-                                            max_value=conf.pixel_max_value)
-                    fits_recover = Normalizer.unstretch(gen_img[:, :, 0])
+                    fits_recover = conf.unstretch(gen_img[:, :, 0])
                     hdu = fits.PrimaryHDU(fits_recover)
                     save_dir = '%s/epoch_%s/fits_output' % (out_dir, epoch + 1)
                     if not os.path.exists(save_dir):
