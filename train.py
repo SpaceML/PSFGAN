@@ -5,7 +5,6 @@ from astropy.io import fits
 from data import *
 from model import CGAN
 
-
 def prepocess_train(img, cond):
     # img = scipy.misc.imresize(img, [conf.adjust_size, conf.adjust_size])
     # cond = scipy.misc.imresize(cond, [conf.adjust_size, conf.adjust_size])
@@ -99,7 +98,7 @@ def train(evalset):
                     if os.path.exists(filename):
                         os.remove(filename)
                     hdu.writeto(filename)
-                    
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

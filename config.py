@@ -1,5 +1,5 @@
 import os
-
+from normalizing import Normalizer
 class Config:
     ## data selection parameters
     redshift = '0.1'
@@ -51,6 +51,13 @@ class Config:
         pixel_max_value = 1657
     pixel_min_value = -0.1
 
+    ## Normalizer, used to scale images
+    normalizer = Normalizer(stretch_type,
+                                 scale_factor,
+                                 pixel_min_value,
+                                 pixel_max_value)
+    stretch = normalizer.stretch
+    unstretch = normalizer.unstretch
     ## contrast distribution for the added PSF
     max_contrast_ratio = 10
     min_contrast_ratio = 0.1
