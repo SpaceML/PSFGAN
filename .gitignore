@@ -10,3 +10,8 @@
 
 #All tarballs
 *.tar
+*.tar.gz
+
+#No hidden files
+.*
+!.gitignore
