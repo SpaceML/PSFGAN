@@ -29,8 +29,14 @@ cd  PSFGAN/
 ## Run our code
 
 ### Create training/validation/testing sets
-*If you already have training/testing data or you are applying PSFGAN to real data, you can skip everything described in this section.*
+*If you already have training/testing data or you are applying PSFGAN to real data, you can skip everything described in this section. If you don't have any data but you want to test our method, you can run the following command.*
 
+```bash
+wget https://share.phys.ethz.ch/~blackhole/PSFGAN/z_0.1_precomputed.tar.gz
+```
+The tarball contains all precomputed data necessary for a training run. 
+
+*If you have original images and want to create a training/validation/testing set, you can perform the following steps.*
 The code assumes a directory structure like the following.
 ```bash
 core_path/
