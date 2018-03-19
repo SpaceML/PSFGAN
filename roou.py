@@ -150,7 +150,7 @@ def roou():
 
         if data_type == 'sdss':
             flux = obj_line['cModelFlux_r'].item()
-            if flux < 0:
+            if mode and flux < 0:
                 print "cModelFlux_r value in catalog is negative!"
                 continue
         elif data_type == 'hubble':
