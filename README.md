@@ -34,7 +34,7 @@ cd  PSFGAN/
 ```bash
 wget https://share.phys.ethz.ch/~blackhole/PSFGAN/z_0.1_precomputed.tar.gz
 ```
-This will download a tarball containing all the precomputed data necessary for a first training run. It is the {% raw %}$$\sim 0.1\%$${% endraw %}  dataset we describe in the paper.
+This will download a tarball containing all the precomputed data necessary for a first training run. It is the $\sim 0.1$  dataset we describe in the paper.
 
 *If you have original images and want to create a training/validation/testing set, you can perform the following steps.*
 The code assumes a directory structure like the following.
