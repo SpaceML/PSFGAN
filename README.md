@@ -32,7 +32,7 @@ cd  PSFGAN/
 *If you already have training/testing data or you are applying PSFGAN to real data, you can skip everything described in this section. If you don't have any data but you want to test our method, you can run the following command.*
 
 ```bash
-wget https://share.phys.ethz.ch/~blackhole/PSFGAN/z_0.1_precomputed.tar.gz
+wget https://share.phys.ethz.ch/~blackhole/spaceml/PSFGAN/z_0.1_precomputed.tar.gz
 ```
 This will download a tarball containing all the precomputed data necessary for a first training run. It is the z=0.1 dataset we describe in the paper.
 
