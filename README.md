@@ -108,6 +108,13 @@ python train.py
 The path ```stretch_setup``` in config.py should point to the directory containing the folder ```npy_input```. The folder ```npy_input``` should contain the training input data (.npy files) in a subfolder called ```train```.
 
 ### Run a trained model
+*We provide the pretrained models we describe in the paper. They were trained on 424 \times 424 pixel SDSS r-band images in three different redshift ranges. To download e.g. the model trained on ```z\tilde 0.05```, use the following command.*
+
+```bash
+wget https://share.phys.ethz.ch/~blackhole/spaceml/PSFGAN/pretrained_SDSS_z_0.05.tar.gz
+```
+*To run a pretrained model, perform the following steps.*
+
 Modify the following constants in config.py.
 * ```model_path```: Path to .ckpt file of pretrained model used in test.py. Should be an empty string if PSFGAN is used in training mode.
 * ```use_gpu```: Value that "CUDA_VISIBLE_DEVICES" should be set to.
