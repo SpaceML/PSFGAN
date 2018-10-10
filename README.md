@@ -30,7 +30,9 @@ cd  PSFGAN/
 
 ### Create training/validation/testing sets
 *If you already have training/testing data or you are applying PSFGAN to real data, you can skip everything described in this section. If you don't have any data but you want to test our method, you can get the data from this Google Drive folder*
+
 https://drive.google.com/open?id=15RNVBdCsonm2EQTxlEeEKO_zf2P-F6cN 
+
 This will get you all the precomputed data necessary for a first training run. It is the z=0.1 dataset we describe in the paper.
 
 *If you have original images and want to create a training/validation/testing set, you can perform the following steps.*
